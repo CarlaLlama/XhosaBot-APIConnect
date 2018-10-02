@@ -4,12 +4,13 @@ import time
 import feersum_nlu
 from feersum_nlu.rest import ApiException
 from examples import feersumnlu_host, feersum_nlu_auth_token
+from dataset_text_samples import labelled_phrases_list
 
 # Configure API key authorization: APIKeyHeader
 configuration = feersum_nlu.Configuration()
 
-# configuration.api_key['AUTH_TOKEN'] = feersum_nlu_auth_token
-configuration.api_key['X-Auth-Token'] = feersum_nlu_auth_token  # Alternative auth key header!
+configuration.api_key['AUTH_TOKEN'] = feersum_nlu_auth_token
+configuration.api_key['X-Auth-Token'] = feersum_nlu_auth_token
 
 configuration.host = feersumnlu_host
 
@@ -19,51 +20,55 @@ instance_name = 'xhosabot_matcher'
 
 create_details = feersum_nlu.FaqMatcherCreateDetails(name=instance_name,
                                                      desc="FAQ matcher for Xhosa Maternity health chatbot.",
-                                                     long_name="The optional more descriptive name.",
+                                                     long_name="XhosaBot_Maternity_FAQs",
                                                      lid_model_file="lid_za",
                                                      load_from_store=False)
 
+# Create NLU Labelled Text Samples from dataset
+labelled_phrases_list_parsed = []
+for phrase in labelled_phrases_list:
+    labelled_phrases_list_parsed.append(
+        feersum_nlu.LabelledTextSample(
+                            text=phrase[1],
+                            label=phrase[2],
+                            lang_code=phrase[3]))
 
 word_manifold_list = [feersum_nlu.LabeledWordManifold('eng', 'feers_wm_eng'),
-                      feersum_nlu.LabeledWordManifold('afr', 'feers_wm_afr'),
-                      feersum_nlu.LabeledWordManifold('zul', 'feers_wm_zul')]
-labelled_phrases_list.append(feersum_nlu.LabelledTextSample(text="Kutheni umntwana wam engalali?",
-                                                            label="lala",
-                                                            lang_code="xho"))
+                      feersum_nlu.LabeledWordManifold('xho', 'feers_wm_xho')]
 
-faq_matcher_get_labels
+# later use: faq_matcher_get_labels
 
-
-
+# Launch Matcher Creation
 try:
     print("Create the FAQ matcher:")
     api_response = api_instance.faq_matcher_create(create_details)
     print(" api_response", api_response)
+except ApiException as e:
+    print("Exception when calling an FAQ matcher create operation:\n" % e)
 
+# Attempt add training samples
+try:
     print("Add training samples to the FAQ matcher:")
     api_response = api_instance.faq_matcher_add_training_samples(instance_name, labelled_phrases_list)
     print(" api_response", api_response)
+except ApiException as e:
+    print("Exception when calling an FAQ matcher add training samples operation:\n" % e)
 
-    print("Add testing samples to the FAQ matcher:")
-    api_response = api_instance.faq_matcher_add_testing_samples(instance_name, labelled_text_sample_testing_list)
-    print(" api_response", api_response)
-
-    immediate_mode = True  # Set to True to do a blocking train operation.
-
+# Train the Matcher
+try:
     train_details = feersum_nlu.TrainDetails(threshold=10.0,
                                              word_manifold_list=word_manifold_list,
-                                             immediate_mode=immediate_mode)
+                                             immediate_mode=True)
 
     print("Train the FAQ matcher:")
     instance_detail = api_instance.faq_matcher_train(instance_name, train_details)
     print(" api_response", instance_detail)
-    print()
+except ApiException as e:
+    print("Exception when calling an FAQ matcher train operation:\n" % e)
 
-    # TRAINING:
-    # If timestamp begins with 'ASYNC...' the the training is running in the background and you need to poll until the
-    # model ID has updated.
-    # if timestamp doesn't begin with ASYNC then the training has completed synchronously and you may continue.
 
+# Training in progress..
+try:
     if instance_detail.training_stamp.startswith('ASYNC'):
         # Background training in progress. We'll poll and wait for it to complete.
         previous_id = instance_detail.id
@@ -91,33 +96,34 @@ try:
 
     print("From the model details the cm_labels where =", cm_labels)
 
+    text_input_0 = "Impawu zokuba n dizokubeleka?"
+    text_input_1 = "How long should labour last?"
+
     print("Match a question:")
     api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_0)
-    print(" type(api_response)", type(api_response))
     print(" api_response", api_response)
-    print()
-
-    print("Update the parameters:")
-    model_params = feersum_nlu.ModelParams(threshold=0.9, desc="Examples: Test FAQ matcher.", long_name="A longer name.")
-    api_response = api_instance.faq_matcher_set_params(instance_name, model_params)
-    print(" type(api_response)", type(api_response))
-    print(" api_response", api_response)
-    print()
 
     print("Match a question:")
     api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_1)
     print(" api_response", api_response)
 
-    print("Add online training samples to the FAQ matcher:")
-    api_response = api_instance.faq_matcher_online_training_samples(instance_name,
-                                                                    additional_labelled_text_sample_list)
-    print("api_response", api_response)
-
-    print("Match a question:")
-    api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_1)
-    print(" api_response", api_response)
+    '''
+        print("Add online training samples to the FAQ matcher:")
+        api_response = api_instance.faq_matcher_online_training_samples(instance_name,
+                                                                        additional_labelled_text_sample_list)
+        print("api_response", api_response)
+    '''
 
 except ApiException as e:
     print("Exception when calling an FAQ matcher operation: %s\n" % e)
 except urllib3.exceptions.HTTPError as e:
     print("Connection HTTPError! %s\n" % e)
+
+    # later do testing
+    '''
+    print("Add testing samples to the FAQ matcher:")
+    api_response = api_instance.faq_matcher_add_testing_samples(instance_name, labelled_text_sample_testing_list)
+    print(" api_response", api_response)
+    
+    immediate_mode = True  # Set to True to do a blocking train operation.
+    '''
