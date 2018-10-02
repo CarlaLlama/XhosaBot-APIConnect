@@ -7,7 +7,7 @@ from examples import feersumnlu_host, feersum_nlu_auth_token
 # Configure API key authorization: APIKeyHeader
 configuration = feersum_nlu.Configuration()
 
-configuration.api_key['X-Auth-Token'] = feersum_nlu_auth_token  # Alternative auth key header!
+configuration.api_key['X-Auth-Token'] = feersum_nlu_auth_token
 
 configuration.host = feersumnlu_host
 
@@ -18,7 +18,8 @@ instance_name = 'xhosabot_matcher'
 create_details = feersum_nlu.FaqMatcherCreateDetails(name=instance_name,
                                                      load_from_store=True)
 
-text_input = feersum_nlu.TextInput("Where can I get a quote?")
+text_input_0 = feersum_nlu.TextInput("Impawu zokuba n dizokubeleka?")
+text_input_1 = feersum_nlu.TextInput("How long should labour last?")
 
 try:
     print("Create the FAQ matcher:")
@@ -36,7 +37,7 @@ try:
     print(" api_response", api_response)
 
     print("Match a question:")
-    api_response = api_instance.faq_matcher_retrieve(instance_name, text_input)
+    api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_0)
     print(" api_response", api_response)
 except ApiException as e:
     print("Exception when calling an FAQ matcher operation: %s\n" % e)

@@ -29,9 +29,9 @@ labelled_phrases_list_parsed = []
 for phrase in labelled_phrases_list:
     labelled_phrases_list_parsed.append(
         feersum_nlu.LabelledTextSample(
-                            text=phrase[1],
-                            label=phrase[2],
-                            lang_code=phrase[3]))
+                            text=phrase[0],
+                            label=phrase[1],
+                            lang_code=phrase[2]))
 
 word_manifold_list = [feersum_nlu.LabeledWordManifold('eng', 'feers_wm_eng'),
                       feersum_nlu.LabeledWordManifold('xho', 'feers_wm_xho')]
@@ -49,7 +49,7 @@ except ApiException as e:
 # Attempt add training samples
 try:
     print("Add training samples to the FAQ matcher:")
-    api_response = api_instance.faq_matcher_add_training_samples(instance_name, labelled_phrases_list)
+    api_response = api_instance.faq_matcher_add_training_samples(instance_name, labelled_phrases_list_parsed)
     print(" api_response", api_response)
 except ApiException as e:
     print("Exception when calling an FAQ matcher add training samples operation:\n" % e)
@@ -63,12 +63,8 @@ try:
     print("Train the FAQ matcher:")
     instance_detail = api_instance.faq_matcher_train(instance_name, train_details)
     print(" api_response", instance_detail)
-except ApiException as e:
-    print("Exception when calling an FAQ matcher train operation:\n" % e)
 
-
-# Training in progress..
-try:
+    # Training in progress..
     if instance_detail.training_stamp.startswith('ASYNC'):
         # Background training in progress. We'll poll and wait for it to complete.
         previous_id = instance_detail.id
@@ -81,23 +77,12 @@ try:
 
         print('Done.')
 
-    print("Get the details of all loaded FAQ matchers:")
-    api_response = api_instance.faq_matcher_get_details_all()
-    print(" api_response", api_response)
-
-    print("Get the details of specific named loaded FAQ matcher:")
-    api_response = api_instance.faq_matcher_get_details(instance_name)
-    print(" api_response", api_response)
-    cm_labels = api_response.cm_labels
-
     print("Get the labels of named loaded FAQ matcher:")
     api_response = api_instance.faq_matcher_get_labels(instance_name)
     print(" api_response", api_response)
 
-    print("From the model details the cm_labels where =", cm_labels)
-
-    text_input_0 = "Impawu zokuba n dizokubeleka?"
-    text_input_1 = "How long should labour last?"
+    text_input_0 = feersum_nlu.TextInput("Impawu zokuba n dizokubeleka?")
+    text_input_1 = feersum_nlu.TextInput("How long should labour last?")
 
     print("Match a question:")
     api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_0)

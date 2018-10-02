@@ -12,4 +12,20 @@ def push_message(user_id, response):
     })
 
 
-push_message("56iEUgkELJ8B3rYqDpyB", "Hello")
+def get_new_message(user_id):
+    messages = db.collection(user_id)\
+        .order_by(u'messageSendTime', direction=firestore.Query.DESCENDING)\
+        .limit(1)\
+        .get()
+
+    for message in messages:
+        message_dict = message.to_dict()
+        if not message_dict["messageFromBot"]:
+            # message_text = message.to_dict()
+            print(message_dict)
+            return
+        else:
+            print("No new message from user.")
+
+
+get_new_message("cA2dDwJNjIMe7ASBIpG67VYiBYj1")
