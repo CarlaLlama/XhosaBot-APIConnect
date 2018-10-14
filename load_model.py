@@ -21,25 +21,33 @@ create_details = feersum_nlu.FaqMatcherCreateDetails(name=instance_name,
 text_input_0 = feersum_nlu.TextInput("Impawu zokuba n dizokubeleka?")
 text_input_1 = feersum_nlu.TextInput("How long should labour last?")
 
-try:
-    print("Create the FAQ matcher:")
-    api_response = api_instance.faq_matcher_create(create_details)
-    print(" api_response", api_response)
 
-    print("Get the details of specific named loaded FAQ matcher:")
-    api_response = api_instance.faq_matcher_get_details(instance_name)
-    print(" api_response", api_response)
+def load_model():
+    try:
+        print("Create the FAQ matcher:")
+        api_response = api_instance.faq_matcher_create(create_details)
+        print(" api_response", api_response)
 
-    # Get the classifier's possible labels. Might be inferred from the training data, but guaranteed to be available
-    # after training.
-    print("Get the labels of named loaded FAQ matcher:")
-    api_response = api_instance.faq_matcher_get_labels(instance_name)
-    print(" api_response", api_response)
+        # Get the classifier's possible labels. Might be inferred from the training data, but guaranteed to be available
+        # after training.
+        print("Get the labels of named loaded FAQ matcher:")
+        api_response = api_instance.faq_matcher_get_labels(instance_name)
+        print(" api_response", api_response)
 
-    print("Match a question:")
-    api_response = api_instance.faq_matcher_retrieve(instance_name, text_input_0)
-    print(" api_response", api_response)
-except ApiException as e:
-    print("Exception when calling an FAQ matcher operation: %s\n" % e)
-except urllib3.exceptions.HTTPError:
-    print("Connection HTTPError!")
+    except ApiException as e:
+        print("Exception when calling an FAQ matcher operation: %s\n" % e)
+    except urllib3.exceptions.HTTPError:
+        print("Connection HTTPError!")
+
+
+def query_model(text):
+    text_input = feersum_nlu.TextInput(text)
+    try:
+        print("Match a question:")
+        api_response = api_instance.faq_matcher_retrieve(instance_name, text_input)
+        print(" api_response", api_response)
+        return api_response
+    except ApiException as e:
+        print("Exception when calling an FAQ matcher operation: %s\n" % e)
+    except urllib3.exceptions.HTTPError:
+        print("Connection HTTPError!")

@@ -45,7 +45,7 @@ try:
     print(" api_response", api_response)
 except ApiException as e:
     print("Exception when calling an FAQ matcher create operation:\n" % e)
-
+G
 # Attempt add training samples
 try:
     print("Add training samples to the FAQ matcher:")

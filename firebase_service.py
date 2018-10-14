@@ -22,10 +22,8 @@ def get_new_message(user_id):
         message_dict = message.to_dict()
         if not message_dict["messageFromBot"]:
             # message_text = message.to_dict()
-            print(message_dict)
-            return
+            print(message_dict["messageText"])
+            return message_dict["messageText"]
         else:
             print("No new message from user.")
-
-
-get_new_message("cA2dDwJNjIMe7ASBIpG67VYiBYj1")
+            return
